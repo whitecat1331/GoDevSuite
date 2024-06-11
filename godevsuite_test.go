@@ -20,7 +20,6 @@ func TestSetupLoggerEmpty(t *testing.T) {
 	defer f.Close()
 	logger.Info("Logger Setup Successfully")
 }
-
 func TestSetupLoggerWithFile(t *testing.T) {
 	logger, f, err := SetupLogger("test.log")
 	if err != nil {

@@ -1,4 +1,4 @@
-module godevsuite
+module github.com/whitecat1331/godevsuite
 
 go 1.22.1
 
