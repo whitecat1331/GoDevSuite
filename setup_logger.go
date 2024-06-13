@@ -72,6 +72,8 @@ func MkLog(logPath string) (string, error) {
 	return logPath, nil
 }
 
+type SLogger = slog.Logger
+
 // Make sure to close the file handler when using this function ie. defer f.Close()
 func SetupSLogger(rawLogPath string) (*slog.Logger, *os.File, error) {
 
@@ -92,6 +94,8 @@ func SetupSLogger(rawLogPath string) (*slog.Logger, *os.File, error) {
 	logger := slog.New(slog.NewTextHandler(f, nil))
 	return logger, f, nil
 }
+
+type Logger = log.Logger
 
 func SetupLogger(rawLogPath string) (*log.Logger, *os.File, error) {
 
