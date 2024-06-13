@@ -1,6 +1,6 @@
 package godevsuite
 
-func removeDuplicates[T comparable](sliceList []T) []T {
+func RemoveDuplicates[T comparable](sliceList []T) []T {
 	allKeys := make(map[T]bool)
 	list := []T{}
 	for _, item := range sliceList {
