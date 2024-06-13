@@ -1,6 +1,7 @@
 package godevsuite
 
 import (
+	"log"
 	"log/slog"
 	"os"
 	"path"
@@ -25,7 +26,7 @@ func MkdirNotExists(dir string, perm os.FileMode) error {
 	}
 
 	if !dirExists {
-		if err := os.Mkdir(dir, perm); err != nil {
+		if err := os.MkdirAll(dir, perm); err != nil {
 			return err
 		}
 	}
@@ -38,8 +39,7 @@ const DEFAULT_FILE_PERM = os.FileMode(0664)
 const DEFAULT_LOG_PERM = os.FileMode(0644)
 const DEFAULT_DIR_PERM = os.FileMode(0775)
 
-// Make sure to close the file handler when using this function ie. defer f.Close()
-func SetupLogger(logPath string) (*slog.Logger, *os.File, error) {
+func MkLog(logPath string) (string, error) {
 
 	logDir, logFile := path.Split(logPath)
 
@@ -51,7 +51,7 @@ func SetupLogger(logPath string) (*slog.Logger, *os.File, error) {
 	if err != nil {
 		slog.Error("Log directory not created")
 		slog.Error(err.Error())
-		return nil, nil, err
+		return "", err
 	}
 
 	if logFile == "" {
@@ -60,7 +60,7 @@ func SetupLogger(logPath string) (*slog.Logger, *os.File, error) {
 		if err != nil {
 			slog.Error("Executable name not found")
 			slog.Error(err.Error())
-			return nil, nil, err
+			return "", err
 		}
 		_, logFile = path.Split(logFile)
 		ext := path.Ext(logFile)
@@ -69,14 +69,46 @@ func SetupLogger(logPath string) (*slog.Logger, *os.File, error) {
 	}
 
 	logPath = path.Join(logDir, logFile)
+	return logPath, nil
+}
+
+// Make sure to close the file handler when using this function ie. defer f.Close()
+func SetupSLogger(rawLogPath string) (*slog.Logger, *os.File, error) {
+
+	logPath, err := MkLog(rawLogPath)
+	if err != nil {
+		slog.Error("Log path not created")
+		slog.Error(err.Error())
+		return nil, nil, err
+	}
 
 	f, err := os.OpenFile(logPath, os.O_WRONLY|os.O_CREATE, DEFAULT_LOG_PERM)
 	if err != nil {
-		slog.Error("Log file not created")
+		slog.Error("Log file not opened")
 		slog.Error(err.Error())
 		return nil, nil, err
 	}
 
 	logger := slog.New(slog.NewTextHandler(f, nil))
+	return logger, f, nil
+}
+
+func SetupLogger(rawLogPath string) (*log.Logger, *os.File, error) {
+
+	logPath, err := MkLog(rawLogPath)
+	if err != nil {
+		slog.Error("Log path not created")
+		slog.Error(err.Error())
+		return nil, nil, err
+	}
+
+	f, err := os.OpenFile(logPath, os.O_WRONLY|os.O_CREATE, DEFAULT_LOG_PERM)
+	if err != nil {
+		slog.Error("Log file not opened")
+		slog.Error(err.Error())
+		return nil, nil, err
+	}
+
+	logger := log.New(f, "", log.Ldate|log.Ltime)
 	return logger, f, nil
 }
