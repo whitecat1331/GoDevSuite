@@ -12,39 +12,27 @@ func TestTestingTemplate(t *testing.T) {
 }
 
 func TestSetupSLoggerEmpty(t *testing.T) {
-	logger, f, err := SetupSLogger("")
+	logger, f := SetupSLogger("")
+	err := f()
 	if err != nil {
-		t.Log("SLogger Failed")
+		t.Log("Failed to close file")
 		t.Fatal(err.Error())
 	}
-	defer f.Close()
 	logger.Info("SLogger Setup Successfully")
 }
 func TestSetupSLoggerWithFile(t *testing.T) {
-	logger, f, err := SetupSLogger("test.log")
-	if err != nil {
-		t.Log("SLogger Failed")
-		t.Fatal(err.Error())
-	}
-	defer f.Close()
+	logger, f := SetupSLogger("test.log")
+	defer f()
 	logger.Info("SLogger Setup Successfully")
 }
 
 func TestSetupSLoggerWithPath(t *testing.T) {
-	logger, f, err := SetupSLogger(path.Join("test_logs", "test.log"))
-	if err != nil {
-		t.Log("SLogger Failed")
-		t.Fatal(err.Error())
-	}
-	defer f.Close()
+	logger, f := SetupSLogger(path.Join("test_logs", "test.log"))
+	defer f()
 	logger.Info("SLogger Setup Successfully")
 }
 func TestSetupSLoggerAsLog(t *testing.T) {
-	logger, f, err := SetupSLogger(path.Join("test_logs", "test.log"))
-	if err != nil {
-		t.Log("SLogger Failed")
-		t.Fatal(err.Error())
-	}
-	defer f.Close()
+	logger, f := SetupSLogger(path.Join("test_logs", "test.log"))
+	defer f()
 	logger.Info("SLogger Setup Successfully")
 }

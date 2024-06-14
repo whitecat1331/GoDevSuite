@@ -1,6 +1,7 @@
 package godevsuite
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -74,45 +75,45 @@ func MkLog(logPath string) (string, error) {
 
 type SLogger = slog.Logger
 
-// Make sure to close the file handler when using this function ie. defer f.Close()
-func SetupSLogger(rawLogPath string) (*slog.Logger, *os.File, error) {
+type closeFile = func() error
+
+func SetupSLogger(rawLogPath string, jsonFormat bool, opts *slog.HandlerOptions) (*slog.Logger, closeFile) {
 
 	logPath, err := MkLog(rawLogPath)
 	if err != nil {
-		slog.Error("Log path not created")
-		slog.Error(err.Error())
-		return nil, nil, err
+		slog.Error(fmt.Sprintf("Log path not created\n%s\n%#T", err.Error(), err))
+		os.Exit(1)
 	}
 
 	f, err := os.OpenFile(logPath, os.O_WRONLY|os.O_CREATE, DEFAULT_LOG_PERM)
 	if err != nil {
-		slog.Error("Log file not opened")
-		slog.Error(err.Error())
-		return nil, nil, err
+		slog.Error(fmt.Sprintf("Log file not created\n%s\n%#T", err.Error(), err))
+		os.Exit(1)
 	}
 
-	logger := slog.New(slog.NewTextHandler(f, nil))
-	return logger, f, nil
+	logger := slog.New(slog.NewTextHandler(f, opts))
+	if jsonFormat {
+		logger = slog.New(slog.NewJSONHandler(f, opts))
+	}
+	return logger, f.Close
 }
 
 type Logger = log.Logger
 
-func SetupLogger(rawLogPath string) (*log.Logger, *os.File, error) {
+func SetupLogger(rawLogPath string) (*log.Logger, *os.File) {
 
 	logPath, err := MkLog(rawLogPath)
 	if err != nil {
-		slog.Error("Log path not created")
-		slog.Error(err.Error())
-		return nil, nil, err
+		slog.Error(fmt.Sprintf("Log path not created\n%s\n%#T", err.Error(), err))
+		os.Exit(1)
 	}
 
 	f, err := os.OpenFile(logPath, os.O_WRONLY|os.O_CREATE, DEFAULT_LOG_PERM)
 	if err != nil {
-		slog.Error("Log file not opened")
-		slog.Error(err.Error())
-		return nil, nil, err
+		slog.Error(fmt.Sprintf("Log file not created\n%s\n%#T", err.Error(), err))
+		os.Exit(1)
 	}
 
 	logger := log.New(f, "", log.Ldate|log.Ltime)
-	return logger, f, nil
+	return logger, f
 }
